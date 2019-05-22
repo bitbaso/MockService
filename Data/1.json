@@ -1,0 +1,13 @@
+{
+    "Request":{
+        "Url": "api/test",
+        "PostData": null
+    },
+    "Response":{
+        "Content": {
+            "Respuesta": 1
+        },
+        "StatusCode": 200,
+        "ContentType": "application/json"
+    }
+}

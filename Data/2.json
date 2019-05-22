@@ -1,0 +1,11 @@
+{
+    "Request":{
+        "Url": "api/test/2",
+        "PostData": null
+    },
+    "Response":{
+        "Content": "Respuesta es 2",
+        "StatusCode": 200,
+        "ContentType": "text/plain"
+    }
+}

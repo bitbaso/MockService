@@ -1,0 +1,13 @@
+{
+    "Request":{
+        "Url": "api/test/3",
+        "PostData": {
+            "animal": "perro"
+        }
+    },
+    "Response":{
+        "Content": "Respuesta es 3",
+        "StatusCode": 200,
+        "ContentType": "text/plain"
+    }
+}
