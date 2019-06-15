@@ -34,19 +34,26 @@ namespace MockService.Managers
         public async Task LoadMocksData(){
             var MockRelations = await this._dataManager.LoadMockRelations();
             if(MockRelations != null) {
-                this._GETMockRelations = this._dataManager.GetGETMockRelations(MockRelations);
-                this._POSTMockRelations = this._dataManager.GetPOSTMockRelations(MockRelations);
+                this._GETMockRelations = this._dataManager.GetMockRelations(MockRelations, RequestType.GET);
+                this._POSTMockRelations = this._dataManager.GetMockRelations(MockRelations, RequestType.POST);
             }
         }
-        public Response GetResponseFromRequest(ReceivedRequest receivedRequest){
+        public Response GetResponseFromRequest(ReceivedRequest receivedRequest, string requestMethodType){
             try{
                 Response outcome = null;
-                if(receivedRequest != null){
-                    var MockRelationOfReceivedRequest = GetMockRelationOfReceivedRequest(receivedRequest, 
-                                                                                         this._GETMockRelations, 
-                                                                                         this._POSTMockRelations);
-                    if(MockRelationOfReceivedRequest != null){
-                        outcome = MockRelationOfReceivedRequest.Response;
+                if(receivedRequest != null && requestMethodType != null){
+                    MockRelation _mockRelationOfReceivedRequest = null;
+                    switch(requestMethodType){
+                        case RequestType.GET:
+                            _mockRelationOfReceivedRequest = GetGetMockRelationOfReceivedRequest(receivedRequest, this._GETMockRelations);
+                            break;
+                        case RequestType.POST:
+                            _mockRelationOfReceivedRequest = GetPostMockRelationOfReceivedRequest(receivedRequest, this._POSTMockRelations);
+                            break;
+                    }
+
+                    if(_mockRelationOfReceivedRequest != null){
+                        outcome = _mockRelationOfReceivedRequest.Response;
                     }
                 }
                 return outcome;
@@ -60,26 +67,6 @@ namespace MockService.Managers
 
 
         #region Private methods
-        private MockRelation GetMockRelationOfReceivedRequest(ReceivedRequest receivedRequest, 
-                                                              List<MockRelation> getMockRelations,
-                                                              List<MockRelation> postMockRelations){
-            try{
-                MockRelation outcome = null;
-
-                if(receivedRequest != null && receivedRequest.Data != null){
-                    outcome = GetPostMockRelationOfReceivedRequest(receivedRequest, postMockRelations);
-                }
-                else{
-                    outcome = GetGetMockRelationOfReceivedRequest(receivedRequest, getMockRelations);
-                }
-
-                return outcome;
-            }
-            catch(Exception ex){
-                _logger.LogError(ex,"GetMockRelationOfReceivedRequest");
-                return null;
-            }
-        }
 
         private MockRelation GetGetMockRelationOfReceivedRequest(ReceivedRequest receivedRequest, List<MockRelation> MockRelations){
             try{

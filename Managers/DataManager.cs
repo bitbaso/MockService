@@ -15,9 +15,6 @@ namespace MockService.Managers
         private const string _dataFolder = "Data";
         private const string _filePattern = "*.json";
         private readonly ILogger<DataManager> _logger;
-
-        private readonly string  RequestTypePOST = "POST";
-        private readonly string  RequestTypeGET = "GET";
         #endregion
 
         #region Constructors
@@ -38,30 +35,16 @@ namespace MockService.Managers
             }
         }
 
-        public List<MockRelation> GetPOSTMockRelations(List<MockRelation> MockRelations){
+        public List<MockRelation> GetMockRelations(List<MockRelation> MockRelations, string requestMethodType){
             try{
-                var postMockRelations = new List<MockRelation>();
+                var mockRelations = new List<MockRelation>();
                 if(MockRelations != null){
-                    postMockRelations = MockRelations.Where((MockRelation) => MockRelation.Request.Type == RequestTypePOST).ToList();
+                    mockRelations = MockRelations.Where((MockRelation) => MockRelation.Request.Type == requestMethodType).ToList();
                 };
-                return postMockRelations;
+                return mockRelations;
             }
             catch(Exception ex){
-                _logger.LogError(ex,"GetPOSTMockRelations");
-                return null;
-            }
-        }
-
-        public List<MockRelation> GetGETMockRelations(List<MockRelation> MockRelations){
-            try{
-                var postMockRelations = new List<MockRelation>();
-                if(MockRelations != null){
-                    postMockRelations = MockRelations.Where((MockRelation) => MockRelation.Request.Type == RequestTypeGET).ToList();
-                };
-                return postMockRelations;
-            }
-            catch(Exception ex){
-                _logger.LogError(ex,"GetGETMockRelations");
+                _logger.LogError(ex,"GetMockRelations");
                 return null;
             }
         }

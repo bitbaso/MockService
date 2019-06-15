@@ -38,7 +38,7 @@ namespace MockService.Controllers
                 IActionResult outcome = null;
                 var receivedRequest = new ReceivedRequest(url);
                 await _requestManager.LoadMocksData();
-                var response = _requestManager.GetResponseFromRequest(receivedRequest);
+                var response = _requestManager.GetResponseFromRequest(receivedRequest, RequestType.GET);
                 outcome = _responseManager.GetActionResultFromResponse(response);
                 return outcome;
             }
@@ -56,7 +56,7 @@ namespace MockService.Controllers
                 IActionResult outcome = null;
                 var receivedRequest = new ReceivedRequest(url, data);
                 await _requestManager.LoadMocksData();
-                var response = _requestManager.GetResponseFromRequest(receivedRequest);
+                var response = _requestManager.GetResponseFromRequest(receivedRequest, RequestType.POST);
                 outcome = _responseManager.GetActionResultFromResponse(response);
                 return outcome;
             }
