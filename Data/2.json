@@ -1,7 +1,8 @@
 {
     "Request":{
         "Url": "api/test/2",
-        "PostData": null
+        "Data": null,
+        "Type": "GET"
     },
     "Response":{
         "Content": "Respuesta es 2",

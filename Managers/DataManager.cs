@@ -15,6 +15,9 @@ namespace MockService.Managers
         private const string _dataFolder = "Data";
         private const string _filePattern = "*.json";
         private readonly ILogger<DataManager> _logger;
+
+        private readonly string  RequestTypePOST = "POST";
+        private readonly string  RequestTypeGET = "GET";
         #endregion
 
         #region Constructors
@@ -39,7 +42,7 @@ namespace MockService.Managers
             try{
                 var postMockRelations = new List<MockRelation>();
                 if(MockRelations != null){
-                    postMockRelations = MockRelations.Where((MockRelation) => MockRelation.Request.PostData != null).ToList();
+                    postMockRelations = MockRelations.Where((MockRelation) => MockRelation.Request.Type == RequestTypePOST).ToList();
                 };
                 return postMockRelations;
             }
@@ -53,7 +56,7 @@ namespace MockService.Managers
             try{
                 var postMockRelations = new List<MockRelation>();
                 if(MockRelations != null){
-                    postMockRelations = MockRelations.Where((MockRelation) => MockRelation.Request.PostData == null).ToList();
+                    postMockRelations = MockRelations.Where((MockRelation) => MockRelation.Request.Type == RequestTypeGET).ToList();
                 };
                 return postMockRelations;
             }

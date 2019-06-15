@@ -1,9 +1,10 @@
 {
     "Request":{
         "Url": "api/test/3",
-        "PostData": {
+        "Data": {
             "animal": "perro"
-        }
+        },
+        "Type": "POST"
     },
     "Response":{
         "Content": "Respuesta es 3",

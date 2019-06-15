@@ -5,7 +5,9 @@ namespace MockService.Models
         #region Public properties
         public string Url { get; set; }
 
-        public object PostData { get; set; }
+        public object Data { get; set; }
+
+        public string Type { get; set; }
         #endregion
 
         #region Constructors
@@ -17,13 +19,13 @@ namespace MockService.Models
                 Url = url;
             }
             
-            PostData = null;
+            Data = null;
         }
-        public Request(string url, object postData){
+        public Request(string url, object data){
             if (!string.IsNullOrEmpty(url))
             {
                 Url = url;
-                PostData = postData;
+                Data = data;
             }
         }
         #endregion

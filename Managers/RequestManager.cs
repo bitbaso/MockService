@@ -66,7 +66,7 @@ namespace MockService.Managers
             try{
                 MockRelation outcome = null;
 
-                if(receivedRequest != null && receivedRequest.PostData != null){
+                if(receivedRequest != null && receivedRequest.Data != null){
                     outcome = GetPostMockRelationOfReceivedRequest(receivedRequest, postMockRelations);
                 }
                 else{
@@ -119,7 +119,7 @@ namespace MockService.Managers
                             var matchedRoute = _routeMatcher.MatchRoute(receivedRequest.Url, MockRelation.Request.Url);
                             if(matchedRoute != null 
                                 && matchedRoute.IsMatch
-                                && IsSameObject(MockRelation.Request.PostData, receivedRequest.PostData)){
+                                && IsSameObject(MockRelation.Request.Data, receivedRequest.Data)){
                                 outcome = MockRelation;
                             }
                         }

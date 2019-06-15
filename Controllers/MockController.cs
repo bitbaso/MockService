@@ -50,11 +50,11 @@ namespace MockService.Controllers
         }
 
         [HttpPost("{*url}")]
-        public async Task<IActionResult> Post(string url, [FromBody] object postData)
+        public async Task<IActionResult> Post(string url, [FromBody] object data)
         {
             try{
                 IActionResult outcome = null;
-                var receivedRequest = new ReceivedRequest(url, postData);
+                var receivedRequest = new ReceivedRequest(url, data);
                 await _requestManager.LoadMocksData();
                 var response = _requestManager.GetResponseFromRequest(receivedRequest);
                 outcome = _responseManager.GetActionResultFromResponse(response);
