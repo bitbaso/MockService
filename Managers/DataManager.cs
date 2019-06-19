@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using LiteDB;
 
 namespace MockService.Managers
 {
@@ -14,6 +15,7 @@ namespace MockService.Managers
         #region Private properties
         private const string _dataFolder = "Data";
         private const string _filePattern = "*.json";
+        private const string _dbFilePath = "data/MockService.db";
         private readonly ILogger<DataManager> _logger;
         #endregion
 
@@ -68,6 +70,23 @@ namespace MockService.Managers
             }            
             
             return outcome;
+        }
+
+        private async Task<List<MockRelation>> GetMockRelationsFromDB(string dbFilePath){
+            try{
+                List<MockRelation> outcome = null;
+                using(var db = new LiteDatabase(dbFilePath))
+                {
+                    var col = db.GetCollection<MockRelation>("MockRelationList");
+                    outcome = col.FindAll().ToList();
+                }
+
+                return outcome;
+            }
+            catch(Exception ex){
+                _logger.LogError(ex,"LoadMockRelationsFromDB");
+                return null;
+            }
         }
 
        

@@ -16,16 +16,19 @@ namespace MockService.Controllers
     {
         #region Private properties
         private readonly IRequestManager _requestManager;
+        private readonly IProxyManager _proxyManager;
         private readonly IResponseManager _responseManager;
         private readonly ILogger<MocksController> _logger;
         #endregion
 
         #region Constructors
         public MocksController(IRequestManager requestManager, 
+                               IProxyManager proxyManager,
                                IResponseManager responseManager,
                                ILogger<MocksController> logger)
         {
             this._requestManager = requestManager;
+            this._proxyManager = proxyManager;
             this._responseManager = responseManager;
             this._logger = logger;
         }
@@ -39,12 +42,15 @@ namespace MockService.Controllers
                 var receivedRequest = new ReceivedRequest(url);
                 await _requestManager.LoadMocksData();
                 var response = _requestManager.GetResponseFromRequest(receivedRequest, RequestType.GET);
+                if(response == null){
+                    response = await _proxyManager.GetResponse(receivedRequest, RequestType.GET);
+                }
                 outcome = _responseManager.GetActionResultFromResponse(response);
                 return outcome;
             }
             catch(Exception ex){
                 _logger.LogError(ex,"Get");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error");;
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error");
             }
             
         }
@@ -57,12 +63,15 @@ namespace MockService.Controllers
                 var receivedRequest = new ReceivedRequest(url, data);
                 await _requestManager.LoadMocksData();
                 var response = _requestManager.GetResponseFromRequest(receivedRequest, RequestType.POST);
+                if(response == null){
+                    response = await _proxyManager.GetResponse(receivedRequest, RequestType.POST);
+                }
                 outcome = _responseManager.GetActionResultFromResponse(response);
                 return outcome;
             }
             catch(Exception ex){
                 _logger.LogError(ex,"Post");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error");;
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error");
             }
         }
     }

@@ -31,6 +31,7 @@ namespace MockService
             services.AddSingleton<IRequestManager, RequestManager>();
             services.AddSingleton<IResponseManager, ResponseManager>();
             services.AddSingleton<IRouteMatcher, RouteMatcher>();
+            services.AddSingleton<IProxyManager, ProxyManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
