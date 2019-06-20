@@ -39,7 +39,9 @@ namespace MockService.Controllers
         {
             try{
                 IActionResult outcome = null;
-                var receivedRequest = new ReceivedRequest(url);
+                var queryString = HttpContext.Request.QueryString.Value;
+                var completeUrl = $"{url}{queryString}";
+                var receivedRequest = new ReceivedRequest(completeUrl);
                 await _requestManager.LoadMocksData();
                 var response = _requestManager.GetResponseFromRequest(receivedRequest, RequestType.GET);
                 if(response == null){
@@ -60,7 +62,9 @@ namespace MockService.Controllers
         {
             try{
                 IActionResult outcome = null;
-                var receivedRequest = new ReceivedRequest(url, data);
+                var queryString = HttpContext.Request.QueryString.Value;
+                var completeUrl = $"{url}{queryString}";
+                var receivedRequest = new ReceivedRequest(completeUrl, data);
                 await _requestManager.LoadMocksData();
                 var response = _requestManager.GetResponseFromRequest(receivedRequest, RequestType.POST);
                 if(response == null){
