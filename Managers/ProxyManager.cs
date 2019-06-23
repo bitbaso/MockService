@@ -5,7 +5,8 @@ using System;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using Newtonsoft.Json;
-﻿using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 
 namespace MockService.Managers
 {
@@ -33,19 +34,13 @@ namespace MockService.Managers
                 if(_isProxyEnabled && !string.IsNullOrEmpty(_proxyHost)){
                     var urlToCall = $"{_proxyHost}{receivedRequest.Url}";
 
-                    var callResponse = "";
                     switch(requestMethodType){
                         case RequestType.GET:
-                            callResponse = await GetHttpCall(urlToCall);
+                            outcome = await GetHttpCall(urlToCall);
                             break;
                         case RequestType.POST:
-                            callResponse = await PostHttpCall(urlToCall, receivedRequest.Data);
+                            outcome = await PostHttpCall(urlToCall, receivedRequest.Data);
                             break;
-                    }
-                    if(!string.IsNullOrEmpty(callResponse)){
-                        outcome = new Response(){
-                            Content = callResponse
-                        };
                     }
                 }
 
@@ -59,9 +54,30 @@ namespace MockService.Managers
         #endregion
 
         #region Private methods
-        private async Task<string> GetHttpCall(string url){
+        private async Task<Response> GetHttpCall(string url){
             try{
-                return await client.GetStringAsync(url);
+                var response = await client.GetAsync(url);
+                var statusCode = response.StatusCode;
+                var mediaType = response.Content.Headers.ContentType.MediaType;
+
+                var responseContent = await response.Content
+                .ReadAsStringAsync();
+
+                object dataToSave = null;
+                if(mediaType == "application/json"){
+                    dataToSave = JObject.Parse(responseContent);
+                }
+                else{
+                    dataToSave = responseContent;
+                }
+
+                var outcome = new Response(){
+                            Content = dataToSave,
+                            StatusCode = (int)statusCode,
+                            ContentType = mediaType
+                        };
+
+                return outcome;
             }
             catch(Exception ex){
                  _logger.LogError(ex,"GetHttpCall");
@@ -69,19 +85,34 @@ namespace MockService.Managers
             }
         }
 
-        private async Task<string> PostHttpCall(string url, object data){
+        private async Task<Response> PostHttpCall(string url, object data){
             try{
-                //var content = new FormUrlEncodedContent(data);
-
                 var myContent = JsonConvert.SerializeObject(data);
                 var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
                 var byteContent = new ByteArrayContent(buffer);
                 byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-
                 var response = await client.PostAsync(url, byteContent);
-                var responseString = await response.Content.ReadAsStringAsync();
-                return responseString;
+                var statusCode = response.StatusCode;
+                var mediaType = response.Content.Headers.ContentType.MediaType;
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                object dataToSave = null;
+                if(mediaType == "application/json"){
+                    dataToSave = JObject.Parse(responseContent);
+                }
+                else{
+                    dataToSave = responseContent;
+                }
+
+                var outcome = new Response(){
+                            Content = dataToSave,
+                            StatusCode = (int)statusCode,
+                            ContentType = mediaType
+                        };
+
+
+                return outcome;
             }
             catch(Exception ex){
                  _logger.LogError(ex,"PostHttpCall");
