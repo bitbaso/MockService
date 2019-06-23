@@ -31,10 +31,10 @@ namespace MockService.Managers
                     var statusToResponse = response.StatusCode;
 
                     switch(response.ContentType){
-                        case "text/plain":
+                        case MediaType.TextPlain:
                             outcome = GetObjectResult(content, statusToResponse);
                             break;
-                        case "application/json":
+                        case MediaType.ApplicationJson:
                             outcome = GetJsonResult(content, statusToResponse);
                             break;
                         default:

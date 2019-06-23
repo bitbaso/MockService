@@ -64,7 +64,7 @@ namespace MockService.Managers
                 .ReadAsStringAsync();
 
                 object dataToSave = null;
-                if(mediaType == "application/json"){
+                if(mediaType == MediaType.ApplicationJson){
                     dataToSave = JObject.Parse(responseContent);
                 }
                 else{
@@ -90,7 +90,7 @@ namespace MockService.Managers
                 var myContent = JsonConvert.SerializeObject(data);
                 var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
                 var byteContent = new ByteArrayContent(buffer);
-                byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                byteContent.Headers.ContentType = new MediaTypeHeaderValue(MediaType.ApplicationJson);
 
                 var response = await client.PostAsync(url, byteContent);
                 var statusCode = response.StatusCode;
@@ -98,7 +98,7 @@ namespace MockService.Managers
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 object dataToSave = null;
-                if(mediaType == "application/json"){
+                if(mediaType == MediaType.ApplicationJson){
                     dataToSave = JObject.Parse(responseContent);
                 }
                 else{
