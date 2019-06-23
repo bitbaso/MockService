@@ -57,19 +57,11 @@ namespace MockService.Managers
         private async Task<Response> GetHttpCall(string url){
             try{
                 var response = await client.GetAsync(url);
-                var statusCode = response.StatusCode;
-                var mediaType = response.Content.Headers.ContentType.MediaType;
+                var statusCode = response?.StatusCode;
+                var mediaType = response?.Content?.Headers?.ContentType?.MediaType;
+                var responseContent = await response?.Content?.ReadAsStringAsync();
 
-                var responseContent = await response.Content
-                .ReadAsStringAsync();
-
-                object dataToSave = null;
-                if(mediaType == MediaType.ApplicationJson){
-                    dataToSave = JObject.Parse(responseContent);
-                }
-                else{
-                    dataToSave = responseContent;
-                }
+                var dataToSave = await GetObjectToSaveByMediaType(responseContent, mediaType);
 
                 var outcome = new Response(){
                             Content = dataToSave,
@@ -93,17 +85,11 @@ namespace MockService.Managers
                 byteContent.Headers.ContentType = new MediaTypeHeaderValue(MediaType.ApplicationJson);
 
                 var response = await client.PostAsync(url, byteContent);
-                var statusCode = response.StatusCode;
-                var mediaType = response.Content.Headers.ContentType.MediaType;
-                var responseContent = await response.Content.ReadAsStringAsync();
+                var statusCode = response?.StatusCode;
+                var mediaType = response?.Content?.Headers?.ContentType?.MediaType;
+                var responseContent = await response?.Content?.ReadAsStringAsync();
 
-                object dataToSave = null;
-                if(mediaType == MediaType.ApplicationJson){
-                    dataToSave = JObject.Parse(responseContent);
-                }
-                else{
-                    dataToSave = responseContent;
-                }
+                var dataToSave = await GetObjectToSaveByMediaType(responseContent, mediaType);
 
                 var outcome = new Response(){
                             Content = dataToSave,
@@ -116,6 +102,28 @@ namespace MockService.Managers
             }
             catch(Exception ex){
                  _logger.LogError(ex,"PostHttpCall");
+                return null;
+            }
+        }
+
+        private async Task<object> GetObjectToSaveByMediaType(string responseContent, string mediaType){
+            try{
+                var outcome = new object();
+                if(!string.IsNullOrEmpty(mediaType)){
+                    if(mediaType == MediaType.ApplicationJson){
+                        outcome = JObject.Parse(responseContent);
+                    }
+                    else{
+                        outcome = responseContent;
+                    }
+                }
+                else{
+                    outcome = responseContent;
+                }
+                return outcome;
+            }
+            catch(Exception ex){
+                _logger.LogError(ex,"GetObjectToSaveByMediaType");
                 return null;
             }
         }
