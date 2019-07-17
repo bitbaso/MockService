@@ -29,8 +29,8 @@ namespace MockService.Managers
         public async Task<List<MockRelation>> LoadMockRelations(){
             try{
                 List<MockRelation> outcome = null;
-                var mockRelationsFromJson = await LoadMockRelationsFromJson(_dataFolder, _filePattern);
-                await AddMockRelations(mockRelationsFromJson);
+                //var mockRelationsFromJson = await LoadMockRelationsFromJson(_dataFolder, _filePattern);
+                //await AddMockRelations(mockRelationsFromJson);
                 outcome = await GetMockRelationsFromDB();
                 return outcome;
             }
