@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace MockService.Models
 {
     public class Request
@@ -5,7 +7,7 @@ namespace MockService.Models
         #region Public properties
         public string Url { get; set; }
 
-        public object Data { get; set; }
+        public string Data { get; set; }
 
         public string Type { get; set; }
         #endregion
@@ -25,7 +27,9 @@ namespace MockService.Models
             if (!string.IsNullOrEmpty(url))
             {
                 Url = url;
-                Data = data;
+                if(data != null){
+                    Data = JsonConvert.SerializeObject(data);
+                }                
             }
         }
         #endregion

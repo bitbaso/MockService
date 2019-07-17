@@ -106,7 +106,7 @@ namespace MockService.Managers
                             var matchedRoute = _routeMatcher.MatchRoute(receivedRequest.Url, MockRelation.Request.Url);
                             if(matchedRoute != null 
                                 && matchedRoute.IsMatch
-                                && IsSameObject(MockRelation.Request.Data, receivedRequest.Data)){
+                                && MockRelation.Request.Data == receivedRequest.Data){
                                 outcome = MockRelation;
                             }
                         }
@@ -121,25 +121,7 @@ namespace MockService.Managers
             }
         }
 
-
-        private bool IsSameObject(object obj1, object obj2){
-            try{
-                var outcome = false;
-                var serializedObject1 = JsonConvert.SerializeObject(obj1);
-                var serializedObject2 = JsonConvert.SerializeObject(obj2);
-
-                if(serializedObject1 == serializedObject2){
-                    outcome = true;
-                }
-                return outcome;
-            }
-            catch(Exception ex){
-                _logger.LogError(ex,"IsSameObject");
-                return false;
-            }
-        }
         #endregion
-
 
     }
 }

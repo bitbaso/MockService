@@ -9,5 +9,6 @@ namespace MockService.Managers
     {
          Task<List<MockRelation>> LoadMockRelations();
          List<MockRelation> GetMockRelations(List<MockRelation> MockRelations, string requestMethodType);
+         Task<bool> AddMockRelation(MockRelation mockRelation);
     }
 }

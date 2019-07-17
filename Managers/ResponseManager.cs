@@ -6,6 +6,7 @@ using MockService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace MockService.Managers
 {
@@ -61,9 +62,10 @@ namespace MockService.Managers
                     && response.ContentType != null;
         }
 
-        private ObjectResult GetObjectResult(Object objectValue, int statusCode){
+        private ObjectResult GetObjectResult(string result, int statusCode){
             try{
-                var outcome = new ObjectResult(objectValue);
+                var objectResult = JsonConvert.DeserializeObject<string>(result);
+                var outcome = new ObjectResult(objectResult);
                 outcome.StatusCode = statusCode;
                 return outcome;
             }
@@ -74,9 +76,10 @@ namespace MockService.Managers
             
         }
 
-        private JsonResult GetJsonResult(Object objectValue, int statusCode){
+        private JsonResult GetJsonResult(string result, int statusCode){
             try{
-                var outcome = new JsonResult(objectValue);
+                var objectResult = JsonConvert.DeserializeObject<object>(result);
+                var outcome = new JsonResult(objectResult);
                 outcome.StatusCode = statusCode;
                 return outcome;
             }

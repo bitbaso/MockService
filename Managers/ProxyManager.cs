@@ -15,15 +15,19 @@ namespace MockService.Managers
         #region Private properties
         private bool _isProxyEnabled = false;
         private string _proxyHost = "";
+        private readonly IDataManager _dataManager;
         private readonly ILogger<ProxyManager> _logger;
-        private readonly HttpClient client = new HttpClient();
+        private readonly HttpClient client = new HttpClient();        
         #endregion
 
         #region Constructors
-        public ProxyManager(IConfiguration config, ILogger<ProxyManager> logger){
+        public ProxyManager(IConfiguration config, 
+                            ILogger<ProxyManager> logger,
+                            IDataManager dataManager){
             this._logger = logger;
             this._isProxyEnabled = config.GetValue<bool>("ProxyEnabled", false);
             this._proxyHost = config.GetValue<string>("ProxyHost", "");
+            this._dataManager = dataManager;
         }
         #endregion
 
@@ -44,6 +48,12 @@ namespace MockService.Managers
                     }
                 }
 
+                if(outcome != null){
+                    SaveMockRelationInDB(outcome, 
+                                         receivedRequest, 
+                                         requestMethodType);
+                }
+
                 return outcome;
             }
             catch(Exception ex){
@@ -61,10 +71,8 @@ namespace MockService.Managers
                 var mediaType = response?.Content?.Headers?.ContentType?.MediaType;
                 var responseContent = await response?.Content?.ReadAsStringAsync();
 
-                var dataToSave = await GetObjectToSaveByMediaType(responseContent, mediaType);
-
                 var outcome = new Response(){
-                            Content = dataToSave,
+                            Content = responseContent,
                             StatusCode = (int)statusCode,
                             ContentType = mediaType
                         };
@@ -89,10 +97,8 @@ namespace MockService.Managers
                 var mediaType = response?.Content?.Headers?.ContentType?.MediaType;
                 var responseContent = await response?.Content?.ReadAsStringAsync();
 
-                var dataToSave = await GetObjectToSaveByMediaType(responseContent, mediaType);
-
                 var outcome = new Response(){
-                            Content = dataToSave,
+                            Content = responseContent,
                             StatusCode = (int)statusCode,
                             ContentType = mediaType
                         };
@@ -106,25 +112,26 @@ namespace MockService.Managers
             }
         }
 
-        private async Task<object> GetObjectToSaveByMediaType(string responseContent, string mediaType){
+        private async Task<bool> SaveMockRelationInDB(Response response, 
+                                                      ReceivedRequest receivedRequest, 
+                                                      string requestMethodType){
             try{
-                var outcome = new object();
-                if(!string.IsNullOrEmpty(mediaType)){
-                    if(mediaType == MediaType.ApplicationJson){
-                        outcome = JObject.Parse(responseContent);
-                    }
-                    else{
-                        outcome = responseContent;
-                    }
-                }
-                else{
-                    outcome = responseContent;
+                var outcome = false;
+                if(response != null 
+                   && receivedRequest != null 
+                   && requestMethodType != null){
+                       var request = new Request(receivedRequest.Url, receivedRequest.Data){
+                           Type = requestMethodType
+                       };
+                       var mockRelationToSave = new MockRelation(request, response);
+                       _dataManager.AddMockRelation(mockRelationToSave);
+                       outcome = true;
                 }
                 return outcome;
             }
             catch(Exception ex){
-                _logger.LogError(ex,"GetObjectToSaveByMediaType");
-                return null;
+                _logger.LogError(ex,"SaveMockRelationInDB");
+                return false;
             }
         }
         #endregion

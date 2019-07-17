@@ -15,7 +15,8 @@ namespace MockService.Managers
         #region Private properties
         private const string _dataFolder = "Data";
         private const string _filePattern = "*.json";
-        private const string _dbFilePath = "data/MockService.db";
+        private const string _dbFilePath = "Data/MockService.db";
+        private const string _mockRelationCollectionName = "MockRelationList";
         private readonly ILogger<DataManager> _logger;
         #endregion
 
@@ -28,7 +29,9 @@ namespace MockService.Managers
         public async Task<List<MockRelation>> LoadMockRelations(){
             try{
                 List<MockRelation> outcome = null;
-                outcome = await LoadMockRelationsFromJson(_dataFolder, _filePattern);
+                var mockRelationsFromJson = await LoadMockRelationsFromJson(_dataFolder, _filePattern);
+                await AddMockRelations(mockRelationsFromJson);
+                outcome = await GetMockRelationsFromDB();
                 return outcome;
             }
             catch(Exception ex){
@@ -48,6 +51,51 @@ namespace MockService.Managers
             catch(Exception ex){
                 _logger.LogError(ex,"GetMockRelations");
                 return null;
+            }
+        }
+
+        public async Task<bool> AddMockRelations(List<MockRelation> mockRelations){
+            try{
+                var outcome = false;
+                if(mockRelations != null){
+                    foreach(var mockRelation in mockRelations){
+                        await AddMockRelation(mockRelation);
+                    }
+                    outcome = true;
+                }
+                return outcome;
+            }
+            catch(Exception ex){
+                 _logger.LogError(ex,"AddMockRelations");
+                return false;
+            }
+        }
+
+        public async Task<bool> AddMockRelation(MockRelation mockRelation){
+            try{
+                var outcome = false;
+
+                if(mockRelation != null){
+                    using(var db = new LiteDatabase(_dbFilePath))
+                    {
+                        var mockRelationsCollection = db.GetCollection<MockRelation>(_mockRelationCollectionName);
+
+                        var mockRelationFiltered = mockRelationsCollection.FindOne(x => x.Request.Url == mockRelation.Request.Url 
+                                                    && x.Request.Data == mockRelation.Request.Data);
+
+                        if(mockRelationFiltered == null){
+                            mockRelationsCollection.Insert(mockRelation);
+                            mockRelationsCollection.EnsureIndex(x => x.Request.Url);
+                            outcome = true;
+                        }
+                    }
+                }
+                
+                return outcome;
+            }
+            catch(Exception ex){
+                _logger.LogError(ex,"AddMockRelation");
+                return false;
             }
         }
 
@@ -72,12 +120,12 @@ namespace MockService.Managers
             return outcome;
         }
 
-        private async Task<List<MockRelation>> GetMockRelationsFromDB(string dbFilePath){
+        private async Task<List<MockRelation>> GetMockRelationsFromDB(){
             try{
                 List<MockRelation> outcome = null;
-                using(var db = new LiteDatabase(dbFilePath))
+                using(var db = new LiteDatabase(_dbFilePath))
                 {
-                    var col = db.GetCollection<MockRelation>("MockRelationList");
+                    var col = db.GetCollection<MockRelation>(_mockRelationCollectionName);
                     outcome = col.FindAll().ToList();
                 }
 
@@ -89,6 +137,5 @@ namespace MockService.Managers
             }
         }
 
-       
     }
 }
