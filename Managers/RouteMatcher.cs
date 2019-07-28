@@ -11,8 +11,6 @@ namespace MockService.Managers
     public class RouteMatcher: IRouteMatcher
     {
         #region Private properties
-        private char _variableStartChar = '{';
-        private char _variableEndChar = '}';
         private readonly ILogger<RouteMatcher> _logger;
         #endregion
 
@@ -29,9 +27,7 @@ namespace MockService.Managers
                 var matchedRoute = new MatchedRoute();
                 if(!string.IsNullOrEmpty(route)){
                     matchedRoute.IsMatch = IsMatchRoute(route, 
-                                                        routePattern,
-                                                        this._variableStartChar,
-                                                        this._variableEndChar);
+                                                        routePattern);
 
                     
                 }
@@ -46,21 +42,13 @@ namespace MockService.Managers
 
         #region Private methods
         private bool IsMatchRoute(string route, 
-                                string routePattern, 
-                                char variableStartChar,
-                                char variableEndChar){
+                                string routePattern){
             try{
                 var outcome = false;
 
-                var template = TemplateParser.Parse(routePattern);
-
-                var matcher = new TemplateMatcher(template, GetDefaults(template));
-
-                if(!route.StartsWith('/')){
-                    route = $"/{route}";
+                if(route == routePattern){
+                    outcome = true;
                 }
-                var parameterValues = new RouteValueDictionary();
-                outcome = matcher.TryMatch(route, parameterValues);
 
                 return outcome;
             }
@@ -68,21 +56,6 @@ namespace MockService.Managers
                 _logger.LogError(ex,"IsMatchRoute");
                 return false;
             }
-        }
-
-        private RouteValueDictionary GetDefaults(RouteTemplate parsedTemplate)
-        {
-            var result = new RouteValueDictionary();
-
-            foreach (var parameter in parsedTemplate.Parameters)
-            {
-                if (parameter.DefaultValue != null)
-                {
-                    result.Add(parameter.Name, parameter.DefaultValue);
-                }
-            }
-
-            return result;
         }
 
         #endregion
