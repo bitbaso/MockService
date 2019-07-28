@@ -5,7 +5,6 @@ namespace MockService.Managers
 {
     public interface IRequestManager
     {
-        Task LoadMocksData();
-        Response GetResponseFromRequest(ReceivedRequest receivedRequest, string requestMethodType);
+        Task<Response> GetResponseFromRequest(ReceivedRequest receivedRequest, string requestMethodType);
     }
 }
