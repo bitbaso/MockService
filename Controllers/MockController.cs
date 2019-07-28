@@ -38,43 +38,77 @@ namespace MockService.Controllers
         public async Task<IActionResult> Get(string url)
         {
             try{
-                IActionResult outcome = null;
-                var queryString = HttpContext.Request.QueryString.Value;
-                var completeUrl = $"{url}{queryString}";
-                var receivedRequest = new ReceivedRequest(completeUrl);
-                var response = await _requestManager.GetResponseFromRequest(receivedRequest, RequestType.GET);
-                if(response == null){
-                    response = await _proxyManager.GetResponse(receivedRequest, RequestType.GET);
-                }
-                outcome = _responseManager.GetActionResultFromResponse(response);
-                return outcome;
+                return await GetActionResultOfRequestType(url, 
+                                                          null, 
+                                                          RequestType.GET);
             }
             catch(Exception ex){
                 _logger.LogError(ex,"Get");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error");
-            }
-            
+            }            
         }
 
         [HttpPost("{*url}")]
         public async Task<IActionResult> Post(string url, [FromBody] object data)
         {
             try{
-                IActionResult outcome = null;
-                var queryString = HttpContext.Request.QueryString.Value;
-                var completeUrl = $"{url}{queryString}";
-                var receivedRequest = new ReceivedRequest(completeUrl, data);
-                var response = await _requestManager.GetResponseFromRequest(receivedRequest, RequestType.POST);
-                if(response == null){
-                    response = await _proxyManager.GetResponse(receivedRequest, RequestType.POST);
-                }
-                outcome = _responseManager.GetActionResultFromResponse(response);
-                return outcome;
+                return await GetActionResultOfRequestType(url, 
+                                                          data, 
+                                                          RequestType.POST);
             }
             catch(Exception ex){
                 _logger.LogError(ex,"Post");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error");
             }
         }
+        
+        [HttpDelete("{*url}")]
+        public async Task<IActionResult> Delete(string url)
+        {
+            try{
+                return await GetActionResultOfRequestType(url, 
+                                                          null, 
+                                                          RequestType.GET);
+            }
+            catch(Exception ex){
+                _logger.LogError(ex,"Get");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error");
+            }            
+        }
+
+        [HttpPut("{*url}")]
+        public async Task<IActionResult> Put(string url, [FromBody] object data)
+        {
+            try{
+                return await GetActionResultOfRequestType(url, 
+                                                          data, 
+                                                          RequestType.POST);
+            }
+            catch(Exception ex){
+                _logger.LogError(ex,"Post");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error");
+            }
+        }
+
+        private async Task<IActionResult> GetActionResultOfRequestType(string url, 
+                                                                       object data, 
+                                                                       string requestType){
+            try{
+                IActionResult outcome = null;
+                var queryString = HttpContext.Request.QueryString.Value;
+                var completeUrl = $"{url}{queryString}";
+                var receivedRequest = new ReceivedRequest(completeUrl, data);
+                var response = await _requestManager.GetResponseFromRequest(receivedRequest, requestType);
+                if(response == null){
+                    response = await _proxyManager.GetResponse(receivedRequest, requestType);
+                }
+                outcome = _responseManager.GetActionResultFromResponse(response);
+                return outcome;
+            }
+            catch(Exception ex){
+                _logger.LogError(ex,"GetActionResultOfRequestType");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error");
+            }
+        } 
     }
 }

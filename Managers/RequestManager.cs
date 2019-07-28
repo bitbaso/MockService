@@ -100,9 +100,10 @@ namespace MockService.Managers
                         if(mockRelation?.Request != null){
 
                             var matchedRoute = _routeMatcher.MatchRoute(receivedRequest.Url, mockRelation.Request.Url);
+                            var jsonEscaped = JsonConvert.ToString(receivedRequest.Data);
                             if(matchedRoute != null 
                                 && matchedRoute.IsMatch
-                                && mockRelation.Request.Data == receivedRequest.Data){
+                                && mockRelation.Request.Data == jsonEscaped){
                                 outcome = mockRelation;
                             }
                         }
