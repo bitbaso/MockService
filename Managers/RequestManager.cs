@@ -33,14 +33,8 @@ namespace MockService.Managers
                 Response outcome = null;
                 if(receivedRequest != null && requestMethodType != null){
                     MockRelation _mockRelationOfReceivedRequest = null;
-                    switch(requestMethodType){
-                        case RequestType.GET:
-                            _mockRelationOfReceivedRequest = await GetGetMockRelationOfReceivedRequest(receivedRequest);
-                            break;
-                        case RequestType.POST:
-                            _mockRelationOfReceivedRequest = await GetPostMockRelationOfReceivedRequest(receivedRequest);
-                            break;
-                    }
+
+                    _mockRelationOfReceivedRequest = await GetMockRelationOfReceivedRequest(receivedRequest, requestMethodType);
 
                     if(_mockRelationOfReceivedRequest != null){
                         outcome = _mockRelationOfReceivedRequest.Response;
@@ -58,22 +52,42 @@ namespace MockService.Managers
 
         #region Private methods
 
-        private async Task<MockRelation> GetGetMockRelationOfReceivedRequest(ReceivedRequest receivedRequest){
+        private async Task<MockRelation> GetMockRelationOfReceivedRequest(ReceivedRequest receivedRequest, string requestType){
             try{
                 MockRelation outcome = null;
 
                 var mockRelations = await this._dataManager.LoadMockRelations();
-                var getMockRelations = this._dataManager.GetMockRelations(mockRelations, RequestType.GET);
+                var mockRelationsOfType = this._dataManager.GetMockRelations(mockRelations, requestType);
 
                 if(receivedRequest != null 
                     && !string.IsNullOrEmpty(receivedRequest.Url) 
-                    && getMockRelations != null){
-                    foreach(var mockRelation in getMockRelations){
+                    && mockRelationsOfType != null){
+                    foreach(var mockRelation in mockRelationsOfType){
                         if(mockRelation?.Request != null){
                             var matchedRoute = _routeMatcher.MatchRoute(receivedRequest.Url, mockRelation.Request.Url);
+                            var urlIsEqual = false;
+                            var dataIsEqual = false;
+                            var hasData = false;
+
                             if(matchedRoute != null && matchedRoute.IsMatch){
-                                outcome = mockRelation;
+                                urlIsEqual = true;                            
                             }
+
+                            if(receivedRequest.Data != null){
+                                hasData = true;
+                            }
+
+                            if(hasData && urlIsEqual){
+                                var jsonEscaped = JsonConvert.ToString(receivedRequest.Data);
+                                if(mockRelation.Request.Data == jsonEscaped){
+                                    dataIsEqual = true;
+                                }
+                            }
+
+                            if((urlIsEqual && !hasData) || (urlIsEqual && dataIsEqual)){
+                                outcome = mockRelation;
+                                break;
+                            }                                
                         }
                     }
                 }
@@ -81,44 +95,11 @@ namespace MockService.Managers
                 return outcome;
             }
             catch(Exception ex){
-                _logger.LogError(ex,"GetGetMockRelationOfReceivedRequest");
-                return null;
-            }
-        }
-
-         private async Task<MockRelation> GetPostMockRelationOfReceivedRequest(ReceivedRequest receivedRequest){
-            try{
-                MockRelation outcome = null;
-
-                var mockRelations = await this._dataManager.LoadMockRelations();
-                var postMockRelations = this._dataManager.GetMockRelations(mockRelations, RequestType.POST);
-
-                if(receivedRequest != null 
-                    && !string.IsNullOrEmpty(receivedRequest.Url) 
-                    && postMockRelations != null){
-                    foreach(var mockRelation in postMockRelations){
-                        if(mockRelation?.Request != null){
-
-                            var matchedRoute = _routeMatcher.MatchRoute(receivedRequest.Url, mockRelation.Request.Url);
-                            var jsonEscaped = JsonConvert.ToString(receivedRequest.Data);
-                            if(matchedRoute != null 
-                                && matchedRoute.IsMatch
-                                && mockRelation.Request.Data == jsonEscaped){
-                                outcome = mockRelation;
-                            }
-                        }
-                    }
-                }
-
-                return outcome;
-            }
-            catch(Exception ex){
-                _logger.LogError(ex,"GetPostMockRelationOfReceivedRequest");
+                _logger.LogError(ex,"GetMockRelationOfReceivedRequest");
                 return null;
             }
         }
 
         #endregion
-
     }
 }
